@@ -16,11 +16,22 @@ public class Scanner : MonoBehaviour
     private Texture2D _texture;
     private Color[] _positions;
     private bool createNewVFX;
+    private int _particleAmount;
+
+    private const string REJECT_LAYER_NAME = "PointReject";
+    private const string PLAYER_TAG = "Player";
+    private const string TEXTURE_NAME = "PositionsTexture";
+    private const string RESOLUTION_PARAMETER_NAME = "Resolution";
+    private const string PARTICLE_AMOUNT_PARAMETER_NAME = "ParticleAmount";
+    private const string SPAWN_EVENT = "Spawn";
+
+    [SerializeField]
+    private LayerMask _layerMask;
     
     [SerializeField]
     private PlayerInput playerInput;
     [SerializeField]
-    private GameObject _vfxPrefab;
+    private VisualEffect _vfxPrefab;
     [SerializeField]
     private GameObject _vfxContainer;
     [SerializeField]
@@ -32,7 +43,7 @@ public class Scanner : MonoBehaviour
     [SerializeField]
     private float _range = 10f;
 
-    [SerializeField] private int particleCount = 16000;
+    [SerializeField] private int resolution = 16000;
 
     private void Start()
     {
@@ -40,9 +51,10 @@ public class Scanner : MonoBehaviour
         _fire = playerInput.actions["Fire"];
         createNewVFX = true;
         CreateNewVisualEffect();
+        ApplyPositions();
     }
     
-    private void Update()
+    private void FixedUpdate()
     {
         // only call if button is pressed
         if (!_fire.IsPressed()) return;
@@ -50,28 +62,33 @@ public class Scanner : MonoBehaviour
         for (int i = 0; i < _pointsPerScan; i++)
         {
             // generate random point
-            Vector2 randomPoint = Random.insideUnitCircle * _radius;
+            Vector3 randomPoint = Random.insideUnitSphere * _radius;
             Vector3 castPointPosition = _castPoint.position;
-            Vector3 randomPoint3D = new (randomPoint.x + castPointPosition.x, randomPoint.y + castPointPosition.y, castPointPosition.z);
+            Vector3 randomPoint3D = new (randomPoint.x + castPointPosition.x, randomPoint.y + castPointPosition.y, randomPoint.z + castPointPosition.z);
             
             // calculate direction to random point
             Vector3 dir = (randomPoint3D - transform.position).normalized;
             
             // cast ray
-            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, _range))
+            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, _range, _layerMask))
             {
                 Debug.DrawRay(transform.position, dir * hit.distance, Color.green);
                 // only add point if the particle count limit is not reached
-                if (_positionsList.Count < particleCount)
+                if (_positionsList.Count < resolution * resolution)
                 {
-                    _positionsList.Add(hit.point);
+                    if (!hit.collider.CompareTag(REJECT_LAYER_NAME))
+                    {
+                        _positionsList.Add(hit.point);
+                        _particleAmount++;
+                        //_currentVFX.SetInt(PARTICLE_AMOUNT_PARAMETER_NAME, _particleAmount);
+                    }
                 }
                 // create new VFX if the particle count limit is reached
-                else
+                else 
                 {
-                    createNewVFX = true;
-                    CreateNewVisualEffect();
-                    break;
+                     createNewVFX = true;
+                     CreateNewVisualEffect();
+                     break;
                 }
             }
             else
@@ -90,18 +107,31 @@ public class Scanner : MonoBehaviour
         // cache position for offset
         Vector3 vfxPos = _currentVFX.transform.position;
         
-        // loop through all positions and encode them into a Color array
-        for (int i = 0; i < particleCount; i++)
+        // cache transform position
+        Vector3 transformPos = transform.position;
+        
+        // cache some more stuff for faster access
+        int loopLength = _texture.width * _texture.height;
+        int posListLen = pos.Length;
+
+        for (int i = 0; i < loopLength; i++)
         {
-            // encode the positions we have and make the rest Color.clear
-            if (i < pos.Length)
+            Color data;
+            
+            // store the transform position on the first index
+            if (i == 0)
             {
-                _positions[i] = new Color(pos[i].x - vfxPos.x, pos[i].y - vfxPos.y, pos[i].z - vfxPos.z, 0);
+                data = new Color(transformPos.x, transformPos.y, transformPos.z, 0);
+            }
+            else if (i < posListLen - 1)
+            {
+                data = new Color(pos[i].x - vfxPos.x, pos[i].y - vfxPos.y, pos[i].z - vfxPos.z, 1);
             }
             else
             {
-                _positions[i] = new Color(0, 0, 0, 0);
+                data = new Color(0, 0, 0, 0);
             }
+            _positions[i] = data;
         }
         
         // apply to texture
@@ -109,7 +139,7 @@ public class Scanner : MonoBehaviour
         _texture.Apply();
         
         // apply to VFX
-        _currentVFX.SetTexture("PositionsTexture", _texture);
+        _currentVFX.SetTexture(TEXTURE_NAME, _texture);
         _currentVFX.Reinit();
     }
 
@@ -122,18 +152,22 @@ public class Scanner : MonoBehaviour
         _vfxList.Add(_currentVFX);
         
         // create new VFX
-        _currentVFX = Instantiate(_vfxPrefab, transform.position, Quaternion.identity, _vfxContainer.transform).GetComponent<VisualEffect>();
-        _currentVFX.SetUInt("ParticleCount", (uint)particleCount);
+        _currentVFX = Instantiate(_vfxPrefab, transform.position, Quaternion.identity, _vfxContainer.transform);
+        _currentVFX.SetUInt(RESOLUTION_PARAMETER_NAME, (uint)resolution);
         
         // create texture
-        _texture = new Texture2D(particleCount, 1, TextureFormat.RGBAFloat, false);
+        _texture = new Texture2D(resolution, resolution, TextureFormat.RGBAFloat, false);
         
         // create color array for positions
-        _positions = new Color[particleCount];
+        _positions = new Color[resolution * resolution];
         
         // clear list
         _positionsList.Clear();
         
+        // set particle amount to 0
+        _particleAmount = 0;
+        _currentVFX.SetInt(PARTICLE_AMOUNT_PARAMETER_NAME, _particleAmount);
+
         createNewVFX = false;
     }
 }
