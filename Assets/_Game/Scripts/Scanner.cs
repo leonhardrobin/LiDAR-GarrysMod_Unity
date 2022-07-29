@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.VFX;
@@ -11,6 +8,7 @@ using Random = UnityEngine.Random;
 public class Scanner : MonoBehaviour
 {
     private InputAction _fire;
+    private InputAction _changeRadius;
     private List<Vector3> _positionsList = new();
     private List<VisualEffect> _vfxList = new();
     private VisualEffect _currentVFX;
@@ -28,23 +26,16 @@ public class Scanner : MonoBehaviour
     private const string PARTICLES_PER_SCAN_PARAMETER_NAME = "ParticlesPerScan";
     private const string SPAWN_EVENT = "Spawn";
 
-    [SerializeField]
-    private LayerMask _layerMask;
-    
-    [SerializeField]
-    private PlayerInput playerInput;
-    [SerializeField]
-    private VisualEffect _vfxPrefab;
-    [SerializeField]
-    private GameObject _vfxContainer;
-    [SerializeField]
-    private Transform _castPoint;
-    [SerializeField]
-    private float _radius = 10f;
-    [SerializeField]
-    private int _pointsPerScan = 100;
-    [SerializeField]
-    private float _range = 10f;
+    [SerializeField] private LayerMask _layerMask;
+    [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private VisualEffect _vfxPrefab;
+    [SerializeField] private GameObject _vfxContainer;
+    [SerializeField] private Transform _castPoint;
+    [SerializeField] private float _radius = 10f;
+    [SerializeField] private float _maxRadius = 10f;
+    [SerializeField] private float _minRadius = 1f;
+    [SerializeField] private int _pointsPerScan = 100;
+    [SerializeField] private float _range = 10f;
 
     [SerializeField] private int resolution = 16000;
 
@@ -52,6 +43,7 @@ public class Scanner : MonoBehaviour
     {
         // Get InputAction from PlayerInput
         _fire = playerInput.actions["Fire"];
+        _changeRadius = playerInput.actions["Scroll"];
         _lineRenderer = GetComponent<LineRenderer>();
         _lineRenderer.enabled = false;
         _createNewVFX = true;
@@ -62,6 +54,15 @@ public class Scanner : MonoBehaviour
     private void FixedUpdate()
     {
         Scan();
+        ChangeRadius();
+    }
+
+    private void ChangeRadius()
+    {
+        if (_changeRadius.triggered)
+        {
+            _radius = Mathf.Clamp(_radius + _changeRadius.ReadValue<float>() * Time.deltaTime, _minRadius, _maxRadius);
+        }
     }
 
     private void ApplyPositions()

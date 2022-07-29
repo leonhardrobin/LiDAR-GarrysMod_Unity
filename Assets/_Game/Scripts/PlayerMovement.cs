@@ -51,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
     [Serializable]
     public class AudioSettings
     {
-        public AudioSource audioSource = default;
+        public AudioSource audioSource;
         public bool enableAudio = true;
         public float baseStepSpeed = 0.5f;
         public float crouchSpeedMultiplier = 1.5f;
@@ -60,9 +60,9 @@ public class PlayerMovement : MonoBehaviour
         public AudioClip[] footstepSounds;
     }
     
-    public bool pauseMovement = false;
+    public bool pauseMovement;
     public bool isSprinting { get; private set; }
-    public bool isSneaking { get; private set; }
+    public bool isCrouching { get; private set; }
     public bool didJump { get; private set; }
 
     #endregion
@@ -76,12 +76,9 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private readonly References _references = new();
-    [SerializeField] 
-    private MovementSettings _movementSettings = new();
-    [SerializeField] 
-    private AdvancedSettings _advancedSettings = new();
-    [SerializeField]
-    private AudioSettings _audioSettings = new();
+    [SerializeField] private MovementSettings _movementSettings = new();
+    [SerializeField] private AdvancedSettings _advancedSettings = new();
+    [SerializeField] private AudioSettings _audioSettings = new();
     
     // Movement Settings
     #if ENABLE_INPUT_SYSTEM
@@ -97,13 +94,13 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 _moveDirection;
     private const float BASE_SPEED = 10f;
     private float _normalColliderHeight;
-    private bool _isCrouch = false;
+    private bool _isCrouch;
     private const string PLAYER_TAG = "Player";
     
     // Audio Settings
-    private float _footstepTimer = 0;
-    private float getCurrentStepSpeed => 
-        isSneaking ? _audioSettings.baseStepSpeed * _audioSettings.crouchSpeedMultiplier : 
+    private float _footstepTimer;
+    private float GetCurrentStepSpeed => 
+        isCrouching ? _audioSettings.baseStepSpeed * _audioSettings.crouchSpeedMultiplier : 
         isSprinting ? _audioSettings.baseStepSpeed * _audioSettings.sprintSpeedMultiplier : 
         _audioSettings.baseStepSpeed;
 
@@ -124,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
         _move = playerInput.actions["Move"];
         _sprint = playerInput.actions["Sprint"];
         _jump = playerInput.actions["Jump"];
-        _sneak = playerInput.actions["Sneak"];
+        _sneak = playerInput.actions["Crouch"];
         #endif
 
         // make physics material
@@ -171,7 +168,7 @@ public class PlayerMovement : MonoBehaviour
     private void GetMovementDirection()
     {
         #if ENABLE_INPUT_SYSTEM
-        // get the movement input axies
+        // get the movement input axis
         float horizontalMovement = _move.ReadValue<Vector2>().x;
         float verticalMovement = _move.ReadValue<Vector2>().y;
         #else
@@ -216,7 +213,7 @@ public class PlayerMovement : MonoBehaviour
         
         // set isSprinting and isSneaking bool to give other scripts that information
         isSprinting = speedMultiplier > 1;
-        isSneaking = speedMultiplier < 1;
+        isCrouching = speedMultiplier < 1;
 
         // combine the direction with the speed modifiers
         Vector3 scaledMovementDirection = new Vector3(
@@ -312,7 +309,7 @@ public class PlayerMovement : MonoBehaviour
             _audioSettings.audioSource.PlayOneShot(
                 _audioSettings.footstepSounds[UnityEngine.Random.Range(0, _audioSettings.footstepSounds.Length)]
                 );
-            _footstepTimer = getCurrentStepSpeed;
+            _footstepTimer = GetCurrentStepSpeed;
         }
     }
 

@@ -2175,6 +2175,8 @@ MonoBehaviour:
   _vfxContainer: {fileID: 2037175779}
   _castPoint: {fileID: 1349352296}
   _radius: 2
+  _maxRadius: 10
+  _minRadius: 1
   _pointsPerScan: 40
   _range: 10
   resolution: 100
