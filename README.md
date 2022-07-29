@@ -1,5 +1,6 @@
-# LiDAR from Garry's Mod in Unity3D
+# LiDAR from <s>Garry's Mod</s> Scanner Sombre in Unity3D
 This project tries to replicate the LiDAR extensions from Garry's Mod in the Unity game engine. It uses the VFX-Graph to spawn and manage the dots.
+But there is a game that already does this: [Scanner Sombre](https://store.steampowered.com/app/475190/Scanner_Sombre/)
 
 ### Development Platform
 - Windows 10 x64
