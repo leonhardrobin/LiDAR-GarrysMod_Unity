@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * Author: Leonhard Schnaitl
+ * GitHub: https://github.com/leonhardrobin
+*/ 
+using UnityEngine;
 
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;

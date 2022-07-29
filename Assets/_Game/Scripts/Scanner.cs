@@ -1,3 +1,7 @@
+/*
+ * Author: Leonhard Schnaitl
+ * GitHub: https://github.com/leonhardrobin
+*/ 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -87,7 +91,7 @@ public class Scanner : MonoBehaviour
             // store the transform position on the first index
             if (i == 0)
             {
-                data = new Color(transformPos.x - vfxPos.x, transformPos.y - vfxPos.y, transformPos.z - vfxPos.z, 0);;
+                 data = new Color(transformPos.x - vfxPos.x, transformPos.y - vfxPos.y, transformPos.z - vfxPos.z, 0);;
             }
             else if (i < posListLen - 1)
             {
