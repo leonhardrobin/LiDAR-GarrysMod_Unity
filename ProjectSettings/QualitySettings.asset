@@ -4,7 +4,7 @@
 QualitySettings:
   m_ObjectHideFlags: 0
   serializedVersion: 5
-  m_CurrentQuality: 0
+  m_CurrentQuality: 2
   m_QualitySettings:
   - serializedVersion: 2
     name: High Fidelity
@@ -125,7 +125,7 @@ QualitySettings:
     PS4: 0
     Server: 0
     Stadia: 0
-    Standalone: 0
+    Standalone: 2
     WebGL: 0
     Windows Store Apps: 0
     XboxOne: 0

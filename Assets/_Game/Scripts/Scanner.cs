@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.VFX;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(LineRenderer))]
 public class Scanner : MonoBehaviour
 {
     private InputAction _fire;
@@ -15,14 +16,16 @@ public class Scanner : MonoBehaviour
     private VisualEffect _currentVFX;
     private Texture2D _texture;
     private Color[] _positions;
-    private bool createNewVFX;
+    private bool _createNewVFX;
     private int _particleAmount;
+    private LineRenderer _lineRenderer;
 
     private const string REJECT_LAYER_NAME = "PointReject";
     private const string PLAYER_TAG = "Player";
     private const string TEXTURE_NAME = "PositionsTexture";
     private const string RESOLUTION_PARAMETER_NAME = "Resolution";
     private const string PARTICLE_AMOUNT_PARAMETER_NAME = "ParticleAmount";
+    private const string PARTICLES_PER_SCAN_PARAMETER_NAME = "ParticlesPerScan";
     private const string SPAWN_EVENT = "Spawn";
 
     [SerializeField]
@@ -49,54 +52,16 @@ public class Scanner : MonoBehaviour
     {
         // Get InputAction from PlayerInput
         _fire = playerInput.actions["Fire"];
-        createNewVFX = true;
+        _lineRenderer = GetComponent<LineRenderer>();
+        _lineRenderer.enabled = false;
+        _createNewVFX = true;
         CreateNewVisualEffect();
         ApplyPositions();
     }
     
     private void FixedUpdate()
     {
-        // only call if button is pressed
-        if (!_fire.IsPressed()) return;
-        
-        for (int i = 0; i < _pointsPerScan; i++)
-        {
-            // generate random point
-            Vector3 randomPoint = Random.insideUnitSphere * _radius;
-            Vector3 castPointPosition = _castPoint.position;
-            Vector3 randomPoint3D = new (randomPoint.x + castPointPosition.x, randomPoint.y + castPointPosition.y, randomPoint.z + castPointPosition.z);
-            
-            // calculate direction to random point
-            Vector3 dir = (randomPoint3D - transform.position).normalized;
-            
-            // cast ray
-            if (Physics.Raycast(transform.position, dir, out RaycastHit hit, _range, _layerMask))
-            {
-                Debug.DrawRay(transform.position, dir * hit.distance, Color.green);
-                // only add point if the particle count limit is not reached
-                if (_positionsList.Count < resolution * resolution)
-                {
-                    if (!hit.collider.CompareTag(REJECT_LAYER_NAME))
-                    {
-                        _positionsList.Add(hit.point);
-                        _particleAmount++;
-                        //_currentVFX.SetInt(PARTICLE_AMOUNT_PARAMETER_NAME, _particleAmount);
-                    }
-                }
-                // create new VFX if the particle count limit is reached
-                else 
-                {
-                     createNewVFX = true;
-                     CreateNewVisualEffect();
-                     break;
-                }
-            }
-            else
-            {
-                Debug.DrawRay(transform.position, dir * _range, Color.red);
-            }
-        }
-        ApplyPositions();
+        Scan();
     }
 
     private void ApplyPositions()
@@ -121,7 +86,7 @@ public class Scanner : MonoBehaviour
             // store the transform position on the first index
             if (i == 0)
             {
-                data = new Color(transformPos.x, transformPos.y, transformPos.z, 0);
+                data = new Color(transformPos.x - vfxPos.x, transformPos.y - vfxPos.y, transformPos.z - vfxPos.z, 0);;
             }
             else if (i < posListLen - 1)
             {
@@ -146,7 +111,7 @@ public class Scanner : MonoBehaviour
     private void CreateNewVisualEffect() // this is fucking performance heavy help
     {
         // make sure it only gets called once
-        if (!createNewVFX) return;
+        if (!_createNewVFX) return;
         
         // add old VFX to list
         _vfxList.Add(_currentVFX);
@@ -154,6 +119,7 @@ public class Scanner : MonoBehaviour
         // create new VFX
         _currentVFX = Instantiate(_vfxPrefab, transform.position, Quaternion.identity, _vfxContainer.transform);
         _currentVFX.SetUInt(RESOLUTION_PARAMETER_NAME, (uint)resolution);
+        _currentVFX.SetInt(PARTICLES_PER_SCAN_PARAMETER_NAME, _pointsPerScan);
         
         // create texture
         _texture = new Texture2D(resolution, resolution, TextureFormat.RGBAFloat, false);
@@ -168,6 +134,63 @@ public class Scanner : MonoBehaviour
         _particleAmount = 0;
         _currentVFX.SetInt(PARTICLE_AMOUNT_PARAMETER_NAME, _particleAmount);
 
-        createNewVFX = false;
+        _createNewVFX = false;
+    }
+
+    private void Scan()
+    {
+        // only call if button is pressed
+        if (_fire.IsPressed())
+        {
+            for (int i = 0; i < _pointsPerScan; i++)
+            {
+                // generate random point
+                Vector3 randomPoint = Random.insideUnitSphere * _radius;
+                Vector3 castPointPosition = _castPoint.position;
+                Vector3 randomPoint3D = new(randomPoint.x + castPointPosition.x, randomPoint.y + castPointPosition.y,
+                    randomPoint.z + castPointPosition.z);
+
+                // calculate direction to random point
+                Vector3 dir = (randomPoint3D - transform.position).normalized;
+
+                // cast ray
+                if (Physics.Raycast(transform.position, dir, out RaycastHit hit, _range, _layerMask))
+                {
+                    Debug.DrawRay(transform.position, dir * hit.distance, Color.green);
+                    // only add point if the particle count limit is not reached
+                    if (_positionsList.Count < resolution * resolution)
+                    {
+                        if (!hit.collider.CompareTag(REJECT_LAYER_NAME))
+                        {
+                            _positionsList.Add(hit.point);
+                            _lineRenderer.enabled = true;
+                            _lineRenderer.SetPositions(new[]
+                            {
+                                transform.position,
+                                hit.point
+                            });
+                            _particleAmount++;
+                            //_currentVFX.SetInt(PARTICLE_AMOUNT_PARAMETER_NAME, _particleAmount);
+                        }
+                    }
+                    // create new VFX if the particle count limit is reached
+                    else
+                    {
+                        _createNewVFX = true;
+                        CreateNewVisualEffect();
+                        break;
+                    }
+                } // raycast
+                else
+                {
+                    Debug.DrawRay(transform.position, dir * _range, Color.red);
+                }
+            } // for loop
+            ApplyPositions();
+        } // button press
+        else
+        {
+            _lineRenderer.enabled = false;
+        }
     }
 }
