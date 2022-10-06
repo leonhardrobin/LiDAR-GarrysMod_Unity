@@ -155,8 +155,9 @@ public class Scanner : MonoBehaviour
                 {
                     Debug.DrawRay(transform.position, dir * hit.distance, Color.green);
                     // only add point if the particle count limit is not reached
-                    if (_positionsList.Count < resolution * resolution && !hit.collider.CompareTag(REJECT_LAYER_NAME))
+                    if (_positionsList.Count < resolution * resolution)
                     {
+                        if (hit.collider.CompareTag(REJECT_LAYER_NAME)) continue;
                         _positionsList.Add(hit.point);
                         _lineRenderer.enabled = true;
                         _lineRenderer.SetPositions(new[]
