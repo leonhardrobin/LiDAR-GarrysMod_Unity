@@ -3,6 +3,7 @@ This project tries to replicate the LiDAR extensions from Garry's Mod in the Uni
 But there is a game that already does this: [Scanner Sombre](https://store.steampowered.com/app/475190/Scanner_Sombre/)
 
 ## [Youtube Video of Project](https://www.youtube.com/watch?v=r8iuUHw-hjk&t=6s)
+## [Youtube Tutorial on how to set it up](https://youtu.be/pbRWRinsbWM)
 
 ### Development Platform
 - Windows 10 x64
