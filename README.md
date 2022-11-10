@@ -23,5 +23,5 @@ But there is a game that already does this: [Scanner Sombre](https://store.steam
 
 ### How?
 *Using the HDRP, VFX Graph and Raycasts mostly.*
-The Raycasts get the points on the mesh that need a particle to be spawned at. By encoding the position information in a 2D texture, we send it to the GPU (the VFX-Graph). Every particle gets assigned a uv coordinate with represents its position. The uv coordinates position gets set and the particles spawn.
+The Raycasts get the points on the mesh that need a particle to be spawned at. By encoding the position information in a 2D texture, we send it to the GPU (the VFX-Graph). Every particle gets assigned a uv coordinate which represents its position. The uv coordinates position gets set and the particles spawn.
 
