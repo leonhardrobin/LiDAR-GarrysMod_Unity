@@ -53,6 +53,7 @@ namespace LRS
 
             pointsData.ForEach(data =>
             {
+                data.ClearData();
                 _createNewVFX = true;
                 data.currentVisualEffect = NewVisualEffect(data.prefab, out data.texture, out data.positionsAsColors);
                 ApplyPositions(data.positionsList, data.currentVisualEffect, data.texture, data.positionsAsColors);
@@ -175,7 +176,6 @@ namespace LRS
                                     else
                                     {
                                         _createNewVFX = true;
-                                        data.usedVisualEffects.Add(data.currentVisualEffect);
                                         data.currentVisualEffect = NewVisualEffect(data.prefab, out data.texture, out data.positionsAsColors);
                                         data.positionsList.Clear();
                                     }

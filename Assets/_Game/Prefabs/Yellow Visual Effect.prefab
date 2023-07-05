@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7634396921019305571}
   - component: {fileID: 7634396921019305596}
   m_Layer: 0
-  m_Name: Green Visual Effect 1
+  m_Name: Yellow Visual Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -60,7 +60,7 @@ VisualEffect:
       m_Array: []
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 0, y: 42.722507, z: 0, w: 1}
+      - m_Value: {x: 31.999996, y: 28.028954, z: 0, w: 1}
         m_Name: ParticleColor
         m_Overridden: 1
     m_Uint:
