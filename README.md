@@ -9,7 +9,7 @@ But there is a game that already does this: [Scanner Sombre](https://store.steam
 - Windows 10 x64
 
 ### Unity Version
-- Unity Version: 2022.1.10f1
+- Unity Version: 2023.1.3f1
 - Using the High Definition Render Pipeline
 
 ### Target Platform
