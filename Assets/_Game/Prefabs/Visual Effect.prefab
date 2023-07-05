@@ -46,6 +46,7 @@ VisualEffect:
   m_InitialEventNameOverriden: 1
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
@@ -59,7 +60,7 @@ VisualEffect:
       m_Array: []
     m_Vector4f:
       m_Array:
-      - m_Value: {x: 23.968628, y: 6.6509805, z: 0, w: 1}
+      - m_Value: {x: 0, y: 29.764145, z: 32, w: 1}
         m_Name: ParticleColor
         m_Overridden: 1
     m_Uint:

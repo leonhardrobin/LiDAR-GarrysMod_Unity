@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PointReject
   - Red
+  - Green
   layers:
   - Default
   - TransparentFX
