@@ -5,8 +5,9 @@ But there is a game that already does this: [Scanner Sombre](https://store.steam
 ## [Youtube Video of Project](https://www.youtube.com/watch?v=r8iuUHw-hjk&t=6s)
 ## [Youtube Tutorial on how to set it up](https://youtu.be/pbRWRinsbWM)
 
-### Development Platform
-- Windows 10 x64
+### Development Platforms
+- Windows 10
+- Windows 11
 
 ### Unity Version
 - Unity Version: 2023.1.3f1
